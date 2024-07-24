@@ -1,32 +1,30 @@
 // // src/middleware/validator.middleware.ts
 
-// import { Request, Response, NextFunction } from "express";
-// import { validate } from "class-validator";
+import { plainToClass } from "class-transformer";
+import { validate, ValidationError } from "class-validator";
+import { NextFunction, Request, Response } from "express";
+import { StatusCode } from "../configs";
+import { sendError } from "../helpers";
 
-// export default function validationMiddleware<T>(type: any) {
-//   return async (req: Request, res: Response, next: NextFunction) => {
-//     try {
-//       // Transform request body to class instance
-//       const dto = new type();
-//       Object.assign(dto, req.body);
+export default function validationMiddleware<T>(type: any) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const input = plainToClass(type, req.body);
+    validate(input).then((errors: ValidationError[]) => {
+      if (errors.length > 0) {
+        const messages = errors.map((error) => ({
+          [error.property]: Object.values(error?.constraints ?? []).join(", "),
+        }));
 
-//       // Validate the DTO
-//       const errors = await validate(dto);
-//       if (errors.length > 0) {
-//         const errorMessages = errors
-//           .map((error) => Object.values(error.constraints))
-//           .join(", ");
-//         return res
-//           .status(400)
-//           .json({ message: "Validation error", errors: errorMessages });
-//       }
-
-//       // Attach validated data to the request object
-//       req.dto = dto;
-//       next();
-//     } catch (error) {
-//       console.error("Error validating request:", error);
-//       return res.status(500).json({ message: "Internal server error" });
-//     }
-//   };
-// }
+        sendError(
+          res,
+          "Validation errors",
+          StatusCode.VALIDATION_ERROR,
+          messages
+        );
+      } else {
+        req.body = input;
+        next();
+      }
+    });
+  };
+}
