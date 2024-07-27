@@ -1,6 +1,6 @@
 import { IsEmail, IsNotEmpty } from "class-validator";
 
-export default class VerifyOtpCreateDto {
+export class VerifyOtpCreateValidator {
   @IsNotEmpty()
   otp: string;
 

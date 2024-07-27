@@ -1,7 +1,7 @@
 import { createClient, SetOptions } from "redis";
 
 class RedisService {
-  static async __int() {
+  private static async __int() {
     return await createClient()
       .on("error", (err) => console.log("Redis Client Error", err))
       .connect();

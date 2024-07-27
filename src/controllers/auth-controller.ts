@@ -12,6 +12,15 @@ const signUp = async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
 
     const existedUser = await UserModel.findOne({ where: { email } });
+    console.log(existedUser);
+    if (existedUser && existedUser.status === USER_STATUS.WAITING_VERIFY) {
+      return sendError(
+        res,
+        "Account already exists, please access your email to verify your account.",
+        StatusCode.BAD_REQUEST,
+        null
+      );
+    }
 
     if (existedUser !== null) {
       return sendError(
@@ -76,6 +85,21 @@ const verifyOtpSignUp = async (req: Request, res: Response) => {
   return sendSuccess(res, null, "Verify success");
 };
 
-const AuthController = { signUp, verifyOtpSignUp };
+const resendOtpSignUp = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const otp = RandomHelper.number(6);
+  await RedisService.set("sign-up/otp/" + email, otp);
+
+  await transporter.sendMail({
+    from: Environment.MAIL_SENDER,
+    to: email,
+    subject: "Verify otp",
+    html: "Your otp: " + otp,
+  });
+
+  return sendSuccess(res, null, "Send otp success");
+};
+
+const AuthController = { signUp, verifyOtpSignUp, resendOtpSignUp };
 
 export default AuthController;
