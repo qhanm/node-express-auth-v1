@@ -31,6 +31,15 @@ export class UserModel
   public verify_at: Date | undefined;
   public created_at: Date;
   public updated_at: Date | undefined;
+
+  static toModel(model: IUserAttribute) {
+    return {
+      id: model.id,
+      email: model.email,
+      name: model.name,
+      createdAt: model.createdAt,
+    };
+  }
 }
 
 UserModel.init(

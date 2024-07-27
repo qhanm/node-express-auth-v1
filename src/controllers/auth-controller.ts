@@ -1,25 +1,81 @@
 import { Request, Response } from "express";
-import validationMiddleware from "../middlewares/validate-body";
-import { CreateUserValidator } from "../validators";
-import { USER_STATUS, UserModel } from "../models";
+import { Environment, StatusCode } from "../configs";
+import { sendError, sendSuccess } from "../helpers";
 import { HashPasswordHelper } from "../helpers/hash-password-helper";
-import { sendSuccess } from "../helpers";
-import { StatusCode } from "../configs";
+import transporter from "../helpers/mailer-helper";
+import RandomHelper from "../helpers/random-helper";
+import RedisService from "../helpers/redis-helper";
+import { USER_STATUS, UserModel } from "../models";
 
-const registerUser = async () => {};
 const signUp = async (req: Request, res: Response) => {
-  await validationMiddleware(CreateUserValidator);
+  try {
+    const { name, email, password } = req.body;
 
-  const { name, email, password } = req.body;
-  const user = await UserModel.create({
-    name,
-    email,
-    password: await HashPasswordHelper.toPassword(password),
-    status: USER_STATUS.WAITING_VERIFY,
+    const existedUser = await UserModel.findOne({ where: { email } });
+
+    if (existedUser !== null) {
+      return sendError(
+        res,
+        "The email of user is existed",
+        StatusCode.BAD_REQUEST,
+        null
+      );
+    }
+
+    const user = await UserModel.create({
+      name,
+      email,
+      password: await HashPasswordHelper.toPassword(password),
+      status: USER_STATUS.WAITING_VERIFY,
+    });
+
+    const otp = RandomHelper.number(6);
+
+    await transporter.sendMail({
+      from: Environment.MAIL_SENDER,
+      to: email,
+      subject: "Verify otp",
+      html: "Your otp: " + otp,
+    });
+
+    // OTP expired 5 minutes
+    await RedisService.set("sign-up/otp/" + email, otp, { EX: 60 * 5 });
+
+    return sendSuccess(
+      res,
+      UserModel.toModel(user),
+      "Create user successful",
+      StatusCode.CREATED
+    );
+  } catch (err) {
+    return sendError(res, "Internal Server Error");
+  }
+};
+
+const verifyOtpSignUp = async (req: Request, res: Response) => {
+  const { otp, email } = req.body;
+
+  const otpStore = await RedisService.get("sign-up/otp/" + email);
+  if (otpStore === null || otp !== otpStore) {
+    return sendError(res, "OTP is invalid", StatusCode.BAD_REQUEST);
+  }
+
+  const user = await UserModel.findOne({
+    where: {
+      email,
+    },
   });
 
-  return sendSuccess(res, user, "Create user successful", StatusCode.CREATED);
+  if (!user || user?.status !== USER_STATUS.WAITING_VERIFY) {
+    return sendError(res, "Verify fail", StatusCode.BAD_REQUEST);
+  }
+
+  user.status = USER_STATUS.ACTIVE;
+  user.save();
+  await RedisService.delete("sign-up/otp/" + email);
+  return sendSuccess(res, null, "Verify success");
 };
-const AuthController = { signUp };
+
+const AuthController = { signUp, verifyOtpSignUp };
 
 export default AuthController;
