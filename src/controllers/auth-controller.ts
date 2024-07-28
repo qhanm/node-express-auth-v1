@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Environment, StatusCode } from "../configs";
-import { sendError, sendSuccess } from "../helpers";
+import { GuardHelper, sendError, sendSuccess } from "../helpers";
 import { HashPasswordHelper } from "../helpers/hash-password-helper";
 import transporter from "../helpers/mailer-helper";
 import RandomHelper from "../helpers/random-helper";
@@ -100,6 +100,40 @@ const resendOtpSignUp = async (req: Request, res: Response) => {
   return sendSuccess(res, null, "Send otp success");
 };
 
-const AuthController = { signUp, verifyOtpSignUp, resendOtpSignUp };
+const signIn = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  const user = await UserModel.findOne({
+    where: { email },
+  });
+
+  if (
+    !user ||
+    user.status === USER_STATUS.WAITING_VERIFY ||
+    !(await HashPasswordHelper.compare(password, user.password))
+  ) {
+    return sendError(
+      res,
+      "Email or password incorrect",
+      StatusCode.BAD_REQUEST
+    );
+  }
+
+  const accessToken = GuardHelper.createAccessToken(user.id);
+  const refreshToken = GuardHelper.createRefreshToken(user.id);
+
+  return sendSuccess(
+    res,
+    {
+      accessToken,
+      refreshToken,
+      user: UserModel.toModel(user),
+    },
+    "Login successful",
+    StatusCode.OK
+  );
+};
+
+const AuthController = { signUp, verifyOtpSignUp, resendOtpSignUp, signIn };
 
 export default AuthController;

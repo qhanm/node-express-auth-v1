@@ -17,4 +17,16 @@ export const Environment = {
   MAIL_PASSWORD: process.env.MAIL_PASSWORD,
   MAIL_SERVICE: process.env.MAIL_SERVICE ?? "gmail",
   MAIL_SENDER: process.env.MAIL_SENDER ?? "gmail",
+
+  JWT_SECRET_KEY:
+    process.env.JWT_SECRET_KEY ??
+    "qdNtVtjOKbC91HDIttDSAbVzzMDxrW3t2XTxtYnBjOhOZCC3s7ZcX0MHJtBp",
+  TOKEN_HEADER_KEY:
+    process.env.TOKEN_HEADER_KEY ??
+    "Ln3SLo7Eti0fEH56n7NjPd4OrhKBjxXjrjT5a6cD39tSy8Rn4q0m4J81fa57",
+  JWT_REFRESH_SECRET_KEY:
+    process.env.JWT_REFRESH_SECRET_KEY ??
+    "7QfBYXAPIt0NbtYmCCZTayqlrwF7x2UiQBHXqYEK8ZFJTHDHuVA2E4q7PB6u",
+  JWT_ACCESS_EXPIRE: process.env.JWT_ACCESS_EXPIRE ?? "1d",
+  JWT_REFRESH_EXPIRE: process.env.JWT_REFRESH_EXPIRE ?? "7d",
 };

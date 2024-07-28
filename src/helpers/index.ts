@@ -3,3 +3,4 @@ export * from "./hash-password-helper";
 export * from "./mailer-helper";
 export * from "./redis-helper";
 export * from "./random-helper";
+export * from "./guard-helper";

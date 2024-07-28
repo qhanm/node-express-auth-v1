@@ -5,13 +5,16 @@ import {
   CreateUserValidator,
   ResendOtpValidator,
   VerifyOtpCreateValidator,
+  SignInValidator,
 } from "../validators";
 
 const router = express.Router();
 
-router.post("/login", () => {
-  console.log("call login");
-});
+router.post(
+  "/sign-in",
+  validationMiddleware(SignInValidator),
+  AuthController.signIn
+);
 
 router.post(
   "/sign-up",
