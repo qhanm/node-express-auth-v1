@@ -29,4 +29,7 @@ export const Environment = {
     "7QfBYXAPIt0NbtYmCCZTayqlrwF7x2UiQBHXqYEK8ZFJTHDHuVA2E4q7PB6u",
   JWT_ACCESS_EXPIRE: process.env.JWT_ACCESS_EXPIRE ?? "1d",
   JWT_REFRESH_EXPIRE: process.env.JWT_REFRESH_EXPIRE ?? "7d",
+
+  REDIS_HOST: process.env.REDIS_HOST ?? "localhost",
+  REDIS_PORT: Number(process.env.REDIS_PORT ?? 6379),
 };

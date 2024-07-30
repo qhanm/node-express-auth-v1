@@ -1,4 +1,5 @@
 import { Response } from "express";
+import { ERROR_CODE } from "../configs";
 
 export const sendSuccess = (
   res: Response,
@@ -18,12 +19,13 @@ export const sendError = (
   res: Response,
   message = "An error occurred",
   statusCode = 500,
+  errorCode: any = ERROR_CODE.INTERNAL_SERVER_ERROR,
   errors: any = {}
 ) => {
   res.status(statusCode).json({
     status: "error",
-    statusCode,
     message,
     errors,
+    errorCode,
   });
 };

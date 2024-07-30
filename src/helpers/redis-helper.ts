@@ -1,8 +1,15 @@
 import { createClient, SetOptions } from "redis";
+import { Environment } from "../configs";
 
 class RedisService {
   private static async __int() {
-    return await createClient()
+    return await createClient({
+      socket: {
+        timeout: 3000,
+        host: Environment.REDIS_HOST,
+        port: Environment.REDIS_PORT,
+      },
+    })
       .on("error", (err) => console.log("Redis Client Error", err))
       .connect();
   }

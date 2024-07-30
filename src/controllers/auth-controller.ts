@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Environment, StatusCode } from "../configs";
+import { Environment, ERROR_CODE, StatusCode } from "../configs";
 import { GuardHelper, sendError, sendSuccess } from "../helpers";
 import { HashPasswordHelper } from "../helpers/hash-password-helper";
 import transporter from "../helpers/mailer-helper";
@@ -12,13 +12,13 @@ const signUp = async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
 
     const existedUser = await UserModel.findOne({ where: { email } });
-    console.log(existedUser);
+
     if (existedUser && existedUser.status === USER_STATUS.WAITING_VERIFY) {
       return sendError(
         res,
         "Account already exists, please access your email to verify your account.",
         StatusCode.BAD_REQUEST,
-        null
+        ERROR_CODE.ACCOUNT_ALREADY_EXISTS
       );
     }
 
@@ -27,7 +27,7 @@ const signUp = async (req: Request, res: Response) => {
         res,
         "The email of user is existed",
         StatusCode.BAD_REQUEST,
-        null
+        ERROR_CODE.EMAIL_ALREADY_EXISTS
       );
     }
 

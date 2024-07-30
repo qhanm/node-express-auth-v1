@@ -10,10 +10,6 @@ const port = Environment.PORT || 5000;
 app.use(express.json());
 
 app.get("/", (req: Request, res: Response) => {
-  // RedisService.set("test_ket", "namqh", { EX: 10 });
-  RedisService.get("test_ket").then((r) => {
-    console.log(r);
-  });
   res.send("Express + TypeScript Server");
 });
 
