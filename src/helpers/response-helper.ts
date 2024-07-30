@@ -9,7 +9,6 @@ export const sendSuccess = (
 ) => {
   res.status(statusCode).json({
     status: "success",
-    statusCode,
     message,
     data,
   });
@@ -17,15 +16,13 @@ export const sendSuccess = (
 
 export const sendError = (
   res: Response,
-  message = "An error occurred",
+  message = ERROR_CODE.INTERNAL_SERVER_ERROR,
   statusCode = 500,
-  errorCode: any = ERROR_CODE.INTERNAL_SERVER_ERROR,
   errors: any = {}
 ) => {
   res.status(statusCode).json({
     status: "error",
     message,
     errors,
-    errorCode,
   });
 };

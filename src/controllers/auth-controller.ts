@@ -7,6 +7,8 @@ import RandomHelper from "../helpers/random-helper";
 import RedisService from "../helpers/redis-helper";
 import { USER_STATUS, UserModel } from "../models";
 
+//************************************************************************************************************* */
+// Sign Up
 const signUp = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
@@ -16,18 +18,16 @@ const signUp = async (req: Request, res: Response) => {
     if (existedUser && existedUser.status === USER_STATUS.WAITING_VERIFY) {
       return sendError(
         res,
-        "Account already exists, please access your email to verify your account.",
-        StatusCode.BAD_REQUEST,
-        ERROR_CODE.ACCOUNT_ALREADY_EXISTS
+        ERROR_CODE.ACCOUNT_ALREADY_EXISTS,
+        StatusCode.BAD_REQUEST
       );
     }
 
     if (existedUser !== null) {
       return sendError(
         res,
-        "The email of user is existed",
-        StatusCode.BAD_REQUEST,
-        ERROR_CODE.EMAIL_ALREADY_EXISTS
+        ERROR_CODE.EMAIL_ALREADY_EXISTS,
+        StatusCode.BAD_REQUEST
       );
     }
 
@@ -57,10 +57,12 @@ const signUp = async (req: Request, res: Response) => {
       StatusCode.CREATED
     );
   } catch (err) {
-    return sendError(res, "Internal Server Error");
+    return sendError(res);
   }
 };
 
+//************************************************************************************************************* */
+// Verify OTP Sign Up
 const verifyOtpSignUp = async (req: Request, res: Response) => {
   const { otp, email } = req.body;
 
@@ -85,6 +87,8 @@ const verifyOtpSignUp = async (req: Request, res: Response) => {
   return sendSuccess(res, null, "Verify success");
 };
 
+//************************************************************************************************************* */
+// Resent OTP
 const resendOtpSignUp = async (req: Request, res: Response) => {
   const { email } = req.body;
   const otp = RandomHelper.number(6);
@@ -100,6 +104,8 @@ const resendOtpSignUp = async (req: Request, res: Response) => {
   return sendSuccess(res, null, "Send otp success");
 };
 
+//************************************************************************************************************* */
+// SIGN IN action
 const signIn = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
@@ -114,7 +120,7 @@ const signIn = async (req: Request, res: Response) => {
   ) {
     return sendError(
       res,
-      "Email or password incorrect",
+      ERROR_CODE.USER_OR_PASSWORD_INCORRECT,
       StatusCode.BAD_REQUEST
     );
   }
@@ -134,6 +140,8 @@ const signIn = async (req: Request, res: Response) => {
   );
 };
 
+//************************************************************************************************************* */
+// Export
 const AuthController = { signUp, verifyOtpSignUp, resendOtpSignUp, signIn };
 
 export default AuthController;
