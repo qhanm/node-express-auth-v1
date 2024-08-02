@@ -68,7 +68,7 @@ const verifyOtpSignUp = async (req: Request, res: Response) => {
 
   const otpStore = await RedisService.get("sign-up/otp/" + email);
   if (otpStore === null || otp !== otpStore) {
-    return sendError(res, "OTP is invalid", StatusCode.BAD_REQUEST);
+    return sendError(res, ERROR_CODE.OTP_INVALID, StatusCode.BAD_REQUEST);
   }
 
   const user = await UserModel.findOne({
@@ -78,7 +78,7 @@ const verifyOtpSignUp = async (req: Request, res: Response) => {
   });
 
   if (!user || user?.status !== USER_STATUS.WAITING_VERIFY) {
-    return sendError(res, "Verify fail", StatusCode.BAD_REQUEST);
+    return sendError(res, ERROR_CODE.VERIFY_OTP_FAIL, StatusCode.BAD_REQUEST);
   }
 
   user.status = USER_STATUS.ACTIVE;

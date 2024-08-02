@@ -29,7 +29,7 @@ router.post(
 );
 
 router.post(
-  "sign-up/resend-otp",
+  "/sign-up/resend-otp",
   validationMiddleware(ResendOtpValidator),
   AuthController.resendOtpSignUp
 );
